@@ -41,7 +41,8 @@ def to_send(topic, value):
         times_saved += 1
 
     output = json.dumps(total)
-    ##There needs to be a function that sends the data    
+    ##There needs to be a function that sends the data
+    print (int(str(output), 10))    
     print (output)
     return
 
