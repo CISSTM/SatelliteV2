@@ -1,7 +1,4 @@
-import sys
-import os
-sys.path.append(os.path.abspath('../src'))
-import helpers
+from helpers import *
 
 get_alt(get_press(), get_alt())
 
