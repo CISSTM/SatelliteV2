@@ -1,4 +1,4 @@
-import sys
+import math
 import json
 import argparse
 import logging
@@ -52,10 +52,10 @@ def to_send(topic, value):
     output = json.dumps(total)
     str_to_send = ""
     for i, c in enumerate(output):
-        str_to_send += str(ord(c))
+        str_to_send += str(ord(c)-31)
         str_to_send += "00"
-    to_send = int(str_to_send)
-    print (output)
+    to_send = math.sqrt(int(str_to_send))
+    print (str_to_send)
     return
 
 def send(code):
