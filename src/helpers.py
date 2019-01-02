@@ -1,7 +1,16 @@
-from collections import OrderedDict
-from os import path
+import sys
 import json
+import argparse
+import logging
+
+
+from collections import OrderedDict
+#from rpi_rf import RFDevice
+#rfdevice = RFDevice(17)
+from os import path
+
 basepath = path.dirname(__file__)
+
 
 times_send =  0
 times_saved = 0
@@ -41,8 +50,15 @@ def to_send(topic, value):
         times_saved += 1
 
     output = json.dumps(total)
-    ##There needs to be a function that sends the data
-    #print (int(str(output), 10))    
+    str_to_send = ""
+    for i, c in enumerate(output):
+        str_to_send += str(ord(c))
+        str_to_send += "00"
+    to_send = int(str_to_send)
     print (output)
     return
 
+def send(code):
+    rfdevice.enable_tx()
+    rfdevice.tx_code(code, 1, 350, 24)
+    rfdevice.cleanup()
