@@ -33,7 +33,7 @@ def to_send(topic, value):
     current_file_output.append(total)
 
     if (times_send % 100 == 0):
-        with open('../data/data' + str(times_saved) +'.json', 'w') as file_backup:
+        with open('../data/data' + str(times_saved) +'.json', 'w+') as file_backup:
             json.dump(current_file_output, file_backup)
 
         times_saved += 1
