@@ -1,4 +1,4 @@
-from '../src/helpers.py' import *
+from helpers import *
 
 get_alt(get_press(), get_alt())
 
