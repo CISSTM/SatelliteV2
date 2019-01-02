@@ -1,5 +1,7 @@
 from collections import OrderedDict
+from os import path
 import json
+basepath = path.dirname(__file__)
 
 times_send =  0
 times_saved = 0
@@ -22,7 +24,6 @@ def to_send(topic, value):
     global times_saved
     global current_file_output
     times_send += 1
-
     if isinstance(value, float):
         value = int(value)
     total = {
@@ -33,12 +34,12 @@ def to_send(topic, value):
     current_file_output.append(total)
 
     if (times_send % 100 == 0):
-        with open('../data/data' + str(times_saved) +'.json', 'w+') as file_backup:
+        with open(basepath + '/../data/data' + str(times_saved) +'.json', 'w+') as file_backup:
             json.dump(current_file_output, file_backup)
-
-        times_saved += 1
-        current_file_output = []
+            current_file_output = []
         
+        times_saved += 1
+
     output = json.dumps(total)
     ##There needs to be a function that sends the data    
     print (output)
