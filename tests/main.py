@@ -1,4 +1,6 @@
 from helpers import *
+import sys
+print("Current python version: "+src(sys.version_info))
 
 get_alt(1013.25, get_press(), get_temp())
 
