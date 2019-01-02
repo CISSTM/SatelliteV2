@@ -42,7 +42,7 @@ def to_send(topic, value):
 
     output = json.dumps(total)
     ##There needs to be a function that sends the data
-    print (int(str(output), 10))    
+    #print (int(str(output), 10))    
     print (output)
     return
 
