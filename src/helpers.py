@@ -3,13 +3,17 @@ import json
 import argparse
 import logging
 
-
+import board
+import digitalio
+import busio
+import time
+import temperature_driver
 from collections import OrderedDict
-#from rpi_rf import RFDevice
-#rfdevice = RFDevice(17)
 from os import path
 
 basepath = path.dirname(__file__)
+i2c = busio.I2C(board.SCL, board.SDA)
+bme280 = temperature_driver.Adafruit_BME280_I2C(i2c)
 
 
 times_send =  0
@@ -17,11 +21,11 @@ times_saved = 0
 current_file_output = []
 
 def get_temp():
-    temp = 15
+    temp = bme280.temperature
     return temp
 
 def get_press():
-    press = 1000
+    press = bme280.pressure
     return press
 
 def get_alt(P0, P, T):
@@ -72,6 +76,4 @@ def to_send(topic, value):
     return
 
 def send(code):
-    rfdevice.enable_tx()
-    rfdevice.tx_code(code, 1, 350, 24)
-    rfdevice.cleanup()
+    print ("no way to send yet")
