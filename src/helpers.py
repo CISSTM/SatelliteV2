@@ -3,7 +3,6 @@ import json
 import argparse
 import logging
 
-
 import board
 import digitalio
 import busio
@@ -11,6 +10,7 @@ import time
 import temperature_driver
 import gyro_driver
 
+import serial
 
 from collections import OrderedDict
 from os import path
@@ -23,6 +23,8 @@ bno055 =  gyro_driver.BNO055(i2c)
 times_send =  0
 times_saved = 0
 current_file_output = []
+
+ser = serial.Serial('/dev/ttyS0', 9600, timeout=1)
 
 def get_temp():
     temp = bme280.temperature
@@ -112,7 +114,9 @@ def to_send(topic, value):
     
     ## Convert the string to int to send
     to_send = int(str_to_send)
-    print (total)
+    byte_send = to_send.to_bytes(4, byteorder='big')
+    ser.write(byte_send)
+    print (byte_send)
     return
 
 def send(code):
