@@ -1,0 +1,13 @@
+[Unit]
+Description=The CISSTM server settings
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/pi/SatelliteV2
+ExecStart=/usr/bin/python3 /home/pi/SatelliteV2/src/main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
