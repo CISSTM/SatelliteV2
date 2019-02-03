@@ -2,6 +2,7 @@ import math
 import json
 import argparse
 import logging
+import datetime
 
 import board
 import digitalio
@@ -104,7 +105,7 @@ def to_send(topic, value):
     ## If it has send a 100 times save the file
     if (times_send % 100 == 0):
         ## Open or create file to save to
-        with open(basepath + '/../data/data' + str(times_saved) +'.json', 'w+') as file_backup:
+        with open(basepath + '/../data/data' + str(datetime.datetime.now().year) + '-'+ str(datetime.datetime.now().month) + '-' + str(datetime.datetime.now().day) + '-' + str(datetime.datetime.now().hour) + ',' + str(datetime.datetime.now().minute) + ',' + str(datetime.datetime.now().second) + '.json', 'w+') as file_backup:
             ##Save to a file
             json.dump(current_file_output, file_backup)
             ## Clear to save
@@ -116,7 +117,7 @@ def to_send(topic, value):
     to_send = int(str_to_send)
     byte_send = to_send.to_bytes(4, byteorder='big')
     ser.write(byte_send)
-    print (byte_send)
+    print (total)
     return
 
 def send(code):
