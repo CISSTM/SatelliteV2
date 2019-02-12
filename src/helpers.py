@@ -144,4 +144,3 @@ def to_send(topic, value):
     byte_send = sending.to_bytes(4, byteorder='big')
     SER.write(byte_send)
     print(total)
-    return
