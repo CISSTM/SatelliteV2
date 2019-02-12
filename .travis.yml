@@ -1,19 +1,13 @@
 language: python
 python:
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "3.5"
   - "3.6"
-  - "3.7-dev"
-  - "pypy3.5"
 
 before_install:
   - mv src/helpers.py tests/helpers.py
 
 install:
   - pip install -r requirements.txt
-  - apt install pylint3
+  - pip install pylint
 
 script:
   - pylint3 src/main.py src/helpers.py src/test.py
