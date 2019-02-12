@@ -10,4 +10,4 @@ install:
   - pip install pylint
 
 script:
-  - pylint src/main.py src/helpers.py src/test.py
+  - cd src && pylint main.py helpers.py
