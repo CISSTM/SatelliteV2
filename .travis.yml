@@ -13,6 +13,7 @@ before_install:
 
 install:
   - pip install -r requirements.txt
+  - apt install pylint3
 
 script:
-  - python tests/main.py
+  - pylint3 src/main.py src/helpers.py src/test.py
