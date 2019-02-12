@@ -1,12 +1,22 @@
-from helpers import *
-import sched, time
-s = sched.scheduler(time.time, time.sleep)
-first_press = get_press()
+"""
+This is the main part, it makes the calls from the helpers file
+"""
 
-def get_data(sc):
+import sched
+import time
+from helpers import get_temp, get_press, get_alt, get_acc, get_x_angle, get_y_angle, \
+    get_z_angle, get_mag_x, get_mag_y, get_gravity, to_send
+
+SCHEDULE = sched.scheduler(time.time, time.sleep)
+FIRST_PRESS = get_press()
+
+def get_data(schedule_call):
+    """
+    The function that just makes sure everything gets called
+    """
     temp = get_temp()
     press = get_press()
-    alt = get_alt(first_press, press, temp)
+    alt = get_alt(FIRST_PRESS, press, temp)
     to_send("temperature", temp)
     to_send("pressure", press)
     to_send("altitude", alt)
@@ -17,7 +27,7 @@ def get_data(sc):
     to_send("ux_mag", get_mag_x())
     to_send("vy_mag", get_mag_y())
     to_send("gravity", get_gravity())
-    s.enter(0.2, 1, get_data, (sc,))
+    SCHEDULE.enter(0.2, 1, get_data, (schedule_call,))
 
-s.enter(0.2, 1, get_data, (s,))
-s.run()
+SCHEDULE.enter(0.2, 1, get_data, (SCHEDULE,))
+SCHEDULE.run()

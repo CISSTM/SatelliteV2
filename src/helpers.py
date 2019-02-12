@@ -1,94 +1,124 @@
-import math
+"""
+This are the helperfunction for the main programme
+"""
+from os import path
+
+
 import json
-import argparse
-import logging
 import datetime
 
 import board
-import digitalio
 import busio
-import time
+import serial
 import temperature_driver
 import gyro_driver
 
-import serial
 
-from collections import OrderedDict
-from os import path
+BASEPATH = path.dirname(__file__)
+I2C = busio.I2C(board.SCL, board.SDA)
+BME280 = temperature_driver.Adafruit_BME280_I2C(I2C)
+BNO055 = gyro_driver.BNO055(I2C)
 
-basepath = path.dirname(__file__)
-i2c = busio.I2C(board.SCL, board.SDA)
-bme280 = temperature_driver.Adafruit_BME280_I2C(i2c)
-bno055 =  gyro_driver.BNO055(i2c)
+TIMES_SEND = 0
+TIMES_SAVED = 0
+CURRENT_FILE_OUTPUT = []
 
-times_send =  0
-times_saved = 0
-current_file_output = []
-
-ser = serial.Serial('/dev/ttyS0', 9600, timeout=1)
+SER = serial.Serial('/dev/ttyS0', 9600, timeout=1)
 
 def get_temp():
-    temp = bme280.temperature
+    """
+    The function that gets the temperature
+    """
+    temp = BME280.temperature
     return temp
 
 def get_press():
-    press = bme280.pressure
+    """
+    The function that gets the pressure
+    """
+    press = BME280.pressure
     return press
 
 def get_acc():
-    acc = bno055.linear_acceleration[2]
+    """
+    The function that gets the acceleration
+    """
+    acc = BNO055.linear_acceleration[2]
     return acc
 
 def get_x_angle():
-    angle = bno055.euler[0]
+    """
+    The function that gets the x angle
+    """
+    angle = BNO055.euler[0]
     return angle
 
 def get_y_angle():
-    angle = bno055.euler[1]
+    """
+    The function that gets the y angle
+    """
+    angle = BNO055.euler[1]
     return angle
 
 def get_z_angle():
-    angle = bno055.euler[2]
+    """
+    The function that gets the z angle
+    """
+    angle = BNO055.euler[2]
     return angle
 
 def get_mag_x():
-    mag = bno055.magnetometer[0]
+    """
+    The function that gets the x mag
+    """
+    mag = BNO055.magnetometer[0]
     return mag
 
 def get_mag_y():
-    mag = bno055.magnetometer[1]
+    """
+    The function that gets the y mag
+    """
+    mag = BNO055.magnetometer[1]
     return mag
 
 def get_gravity():
-    gravity = bno055.gravity[2]
+    """
+    The function that gets the gravity
+    """
+    gravity = BNO055.gravity[2]
     return gravity
 
-def get_alt(P0, P, T):
-    h = (((P0/P)**(1/5.257)-1)*(T+273.15))/(0.0065)
-    if (h<0):
-        h = abs(h) + 9000
-    return h;
+def get_alt(pressure_0, pressure_now, temperature_now):
+    """
+    The function that calculates the altitude
+    """
+    height = (((pressure_0/pressure_now)**(1/5.257)-1)*(temperature_now+273.15))/(0.0065)
+    if height < 0:
+        height = abs(height) + 9000
+    return height
 
 def to_send(topic, value):
-    global times_send
-    global times_saved
-    global current_file_output
-    times_send += 1
+    """
+    The function that sends and saves
+    """
+    global TIMES_SEND
+    global TIMES_SAVED
+    global CURRENT_FILE_OUTPUT
+    TIMES_SEND += 1
 
     # Round numbers for when to send
     if isinstance(value, float):
         value = int(value)
-    
     total = {
         topic: value,
-        "s": times_send
+        "s": TIMES_SEND
     }
 
     ## Starting message
     str_to_send = "11"
     ## Topic number
     str_to_send += str(ord(topic[0])-31)
-    if (value < 0):
+    if value < 0:
         value = abs(value) + 9000
         value = int(value)
     while value > 9999:
@@ -100,25 +130,18 @@ def to_send(topic, value):
     str_to_send += "22"
 
     ## Add to current save
-    current_file_output.append(total)
+    CURRENT_FILE_OUTPUT.append(total)
 
-    ## If it has send a 100 times save the file
-    if (times_send % 100 == 0):
-        ## Open or create file to save to
-        with open(basepath + '/../data/data' + str(datetime.datetime.now().year) + '-'+ str(datetime.datetime.now().month) + '-' + str(datetime.datetime.now().day) + '-' + str(datetime.datetime.now().hour) + ',' + str(datetime.datetime.now().minute) + ',' + str(datetime.datetime.now().second) + '.json', 'w+') as file_backup:
-            ##Save to a file
-            json.dump(current_file_output, file_backup)
-            ## Clear to save
-            current_file_output = []
-        ## +1 for time saved so that it saves to a new file
-        times_saved += 1
-    
-    ## Convert the string to int to send
-    to_send = int(str_to_send)
-    byte_send = to_send.to_bytes(4, byteorder='big')
-    ser.write(byte_send)
-    print (total)
+    if TIMES_SEND % 100 == 0:
+        with open(BASEPATH + '/../data/data' + str(datetime.datetime.now().year) + '-'+ \
+            str(datetime.datetime.now().month) + '-' + str(datetime.datetime.now().day) + \
+            '-' + str(datetime.datetime.now().hour) + ',' + str(datetime.datetime.now().minute) + \
+            ',' + str(datetime.datetime.now().second) + '.json', 'w+') as file_backup:
+            json.dump(CURRENT_FILE_OUTPUT, file_backup)
+            CURRENT_FILE_OUTPUT = []
+        TIMES_SAVED += 1
+    sending = int(str_to_send)
+    byte_send = sending.to_bytes(4, byteorder='big')
+    SER.write(byte_send)
+    print(total)
     return
-
-def send(code):
-    print ("no way to send yet")
