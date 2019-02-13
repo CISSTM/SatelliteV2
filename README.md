@@ -2,7 +2,8 @@
 [![Build Status](https://travis-ci.com/CISSTM/SatelliteV2.svg?branch=master)](https://travis-ci.com/CISSTM/SatelliteV2)
 
 
-This is the newer version of the CissTM satellite, it's written in Python (instead of NodeJS), because of compatebility issues.
+The CISSTM Satellite (Version 2), this is our satellite created using Python (and possibly a bit of C).
+Our satellite is capable of getting the distance of an object using the RSSI and the light speed.
 
 ## How to install
 ### Clone from Github
