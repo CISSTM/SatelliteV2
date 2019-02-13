@@ -16,8 +16,19 @@ import gyro_driver
 
 BASEPATH = path.dirname(__file__)
 I2C = busio.I2C(board.SCL, board.SDA)
-BME280 = temperature_driver.Adafruit_BME280_I2C(I2C)
-BNO055 = gyro_driver.BNO055(I2C)
+try:
+    BME280 = temperature_driver.Adafruit_BME280_I2C(I2C)
+except RuntimeError:
+    print("BMP280 not connected")
+except Exception:
+    print("Unknown error")
+
+try:
+    BNO055 = gyro_driver.BNO055(I2C)
+except RuntimeError:
+    print("BNO055 not connected")
+except Exception:
+    print("Unkown error")
 
 TIMES_SEND = 0
 TIMES_SAVED = 0
@@ -29,73 +40,167 @@ def get_temp():
     """
     The function that gets the temperature
     """
-    temp = BME280.temperature
-    return temp
+    try:
+        temp = BME280.temperature
+        return temp
+    except RuntimeError:
+        print("BMP280 not connected")
+        temp = get_backup_temp()
+        return temp
+    except Exception as error:
+        print(error)
+        return 9999
+
+def get_backup_temp():
+    """
+    This is the function for if the BMP280 malfunctions
+    """
+    try:
+        temp = BNO055.temperature
+        return temp
+    except RuntimeError:
+        print("BNO055 not connected")
+        return 2222
+    except Exception:
+        return 9999
 
 def get_press():
     """
     The function that gets the pressure
     """
-    press = BME280.pressure
-    return press
+    try:
+        press = BME280.pressure
+        return press
+    except RuntimeError:
+        print("BMP280 not connected")
+        return 1111
+    except Exception:
+        return 9999
 
 def get_acc():
     """
     The function that gets the acceleration
     """
-    acc = BNO055.linear_acceleration[2]
-    return acc
+    try:
+        acc = BNO055.linear_acceleration[2]
+        return acc
+    except RuntimeError:
+        print("BNO055 not connected")
+        return 2222
+    except Exception:
+        return 9999
 
 def get_x_angle():
     """
     The function that gets the x angle
     """
-    angle = BNO055.euler[0]
-    return angle
+    try:
+        angle = BNO055.euler[0]
+        return angle
+    except RuntimeError:
+        print("BNO055 not connected")
+        return 2222
+    except Exception:
+        return 9999
 
 def get_y_angle():
     """
     The function that gets the y angle
     """
-    angle = BNO055.euler[1]
-    return angle
+    try:
+        angle = BNO055.euler[1]
+        return angle
+    except RuntimeError:
+        print("BNO055 not connected")
+        return 2222
+    except Exception:
+        return 9999
 
 def get_z_angle():
     """
     The function that gets the z angle
     """
-    angle = BNO055.euler[2]
-    return angle
+    try:
+        angle = BNO055.euler[2]
+        return angle
+    except RuntimeError:
+        print("BNO055 not connected")
+        return 2222
+    except Exception:
+        return 9999
 
 def get_mag_x():
     """
     The function that gets the x mag
     """
-    mag = BNO055.magnetometer[0]
-    return mag
+    try:
+        mag = BNO055.magnetometer[0]
+        return mag
+    except RuntimeError:
+        print("BNO055 not connected")
+        return 2222
+    except Exception:
+        return 9999
 
 def get_mag_y():
     """
     The function that gets the y mag
     """
-    mag = BNO055.magnetometer[1]
-    return mag
+    try:
+        mag = BNO055.magnetometer[1]
+        return mag
+    except RuntimeError:
+        print("BNO055 not connected")
+        return 2222
+    except Exception:
+        return 9999
 
 def get_gravity():
     """
     The function that gets the gravity
     """
-    gravity = BNO055.gravity[2]
-    return gravity
+    try:
+        gravity = BNO055.gravity[2]
+        return gravity
+    except RuntimeError:
+        print("BNO055 not connected")
+        return 2222
+    except Exception:
+        return 9999
 
 def get_alt(pressure_0, pressure_now, temperature_now):
     """
     The function that calculates the altitude
     """
-    height = (((pressure_0/pressure_now)**(1/5.257)-1)*(temperature_now+273.15))/(0.0065)
-    if height < 0:
-        height = abs(height) + 9000
-    return height
+    try:
+        if pressure_0 < 500:
+            print("Pressure is to low")
+            pressure_0 = 1013.25
+
+        if (pressure_0 == 1111) or (pressure_0 == 9999):
+            print("Initial pressure error")
+            pressure_0 = 1013.25
+
+        if pressure_now < 500:
+            print("Pressure is to low")
+            pressure_now = 1013.25
+
+        if (pressure_now == 1111) or (pressure_now == 9999):
+            print("Pressure error")
+            pressure_now = 1013.25
+
+        if (temperature_now == 1111) or (temperature_now == 9999):
+            print("Temperature error")
+            temperature_now = 5
+
+        height = (((pressure_0/pressure_now)**(1/5.257)-1)*(temperature_now+273.15))/(0.0065)
+        if height < 0:
+            height = abs(height) + 9000
+        return height
+    except ZeroDivisionError:
+        return get_alt(pressure_0, pressure_now + 1, temperature_now)
+    except Exception:
+        return 9999
 
 def to_send(topic, value):
     """
@@ -133,14 +238,23 @@ def to_send(topic, value):
     CURRENT_FILE_OUTPUT.append(total)
 
     if TIMES_SEND % 100 == 0:
-        with open(BASEPATH + '/../data/data' + str(datetime.datetime.now().year) + '-'+ \
-            str(datetime.datetime.now().month) + '-' + str(datetime.datetime.now().day) + \
-            '-' + str(datetime.datetime.now().hour) + ',' + str(datetime.datetime.now().minute) + \
-            ',' + str(datetime.datetime.now().second) + '.json', 'w+') as file_backup:
-            json.dump(CURRENT_FILE_OUTPUT, file_backup)
+        try:
+            with open(BASEPATH + '/../data/data' + str(datetime.datetime.now().year) + \
+                '-' + str(datetime.datetime.now().month) + \
+                '-' + str(datetime.datetime.now().day) + \
+                '-' + str(datetime.datetime.now().hour) + \
+                ',' + str(datetime.datetime.now().minute) + \
+                ',' + str(datetime.datetime.now().second) + '.json', 'w+') as file_backup:
+                json.dump(CURRENT_FILE_OUTPUT, file_backup)
+                CURRENT_FILE_OUTPUT = []
+            TIMES_SAVED += 1
+        except Exception:
+            print("Cannot save, so just sending for now.")
             CURRENT_FILE_OUTPUT = []
-        TIMES_SAVED += 1
-    sending = int(str_to_send)
-    byte_send = sending.to_bytes(4, byteorder='big')
-    SER.write(byte_send)
+    try:
+        sending = int(str_to_send)
+        byte_send = sending.to_bytes(4, byteorder='big')
+        SER.write(byte_send)
+    except Exception:
+        print("Cannot send, just saving for now")
     print(total)

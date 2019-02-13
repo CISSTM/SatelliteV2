@@ -9,7 +9,6 @@ from helpers import get_temp, get_press, get_alt, get_acc, get_x_angle, get_y_an
 
 SCHEDULE = sched.scheduler(time.time, time.sleep)
 FIRST_PRESS = get_press()
-
 def get_data(schedule_call):
     """
     The function that just makes sure everything gets called
