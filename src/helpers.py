@@ -34,8 +34,10 @@ TIMES_SEND = 0
 TIMES_SAVED = 0
 CURRENT_FILE_OUTPUT = []
 
-SER = serial.Serial('/dev/ttyS0', 9600, timeout=1)
-
+try:
+    SER = serial.Serial('/dev/ttyS0', 9600, timeout=1)
+except Exception:
+    print("Cannot make serial connection")
 def get_temp():
     """
     The function that gets the temperature
@@ -219,20 +221,24 @@ def to_send(topic, value):
         "s": TIMES_SEND
     }
 
-    ## Starting message
-    str_to_send = "11"
-    ## Topic number
-    str_to_send += str(ord(topic[0])-31)
-    if value < 0:
-        value = abs(value) + 9000
-        value = int(value)
-    while value > 9999:
-        value = value/10
-        value = int(value)
-    ## Add the value
-    str_to_send += str(format(value, '04d'))
-    ## Add closing message
-    str_to_send += "22"
+    try:
+        ## Starting message
+        str_to_send = "11"
+        ## Topic number
+        str_to_send += str(ord(topic[0])-31)
+        if value < 0:
+            value = abs(value) + 9000
+            value = int(value)
+        while value > 9999:
+            value = value/10
+            value = int(value)
+        ## Add the value
+        str_to_send += str(format(value, '04d'))
+        ## Add closing message
+        str_to_send += "22"
+    except Exception:
+        print("Error converting to short string")
+        str_to_send = "1111111122"
 
     ## Add to current save
     CURRENT_FILE_OUTPUT.append(total)
