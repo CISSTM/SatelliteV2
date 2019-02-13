@@ -7,4 +7,4 @@ install:
   - pip install pylint
 
 script:
-  - cd src && pylint main.py helpers.py -d global-statement
+  - cd src && pylint main.py helpers.py -d global-statement,broad-except
