@@ -34,3 +34,14 @@ Run the satellite software by using:
 python3 src/main.py
 ```
 
+## How to build
+We've build our satellite using these components:
+- Raspberry Pi Zero WH
+- APC220 (should work with any serial 433 sender)
+- BMP280
+- BNO055
+- DS1307 (for getting accurate time, not used with python, but connected to raspbian directly)
+- RF69HCW (for localizing efforts)
+
+### Wiring
+![Satellite wiring](.github/satellite.png "Satellite wiring")
