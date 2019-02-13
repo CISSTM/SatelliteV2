@@ -179,7 +179,7 @@ def get_alt(pressure_0, pressure_now, temperature_now):
             print("Pressure is to low")
             pressure_0 = 1013.25
 
-        if (pressure_0 == 1111) or (pressure_0 == 9999):
+        if pressure_0 in (1111, 9999):
             print("Initial pressure error")
             pressure_0 = 1013.25
 
@@ -187,11 +187,11 @@ def get_alt(pressure_0, pressure_now, temperature_now):
             print("Pressure is to low")
             pressure_now = 1013.25
 
-        if (pressure_now == 1111) or (pressure_now == 9999):
+        if pressure_now in (1111, 9999):
             print("Pressure error")
             pressure_now = 1013.25
 
-        if (temperature_now == 1111) or (temperature_now == 9999):
+        if temperature_now in (1111, 2222, 9999):
             print("Temperature error")
             temperature_now = 5
 
