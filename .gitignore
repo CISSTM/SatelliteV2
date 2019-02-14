@@ -107,7 +107,7 @@ venv.bak/
 /site
 
 # mypy
-.mypy_cache/
+.mypy_c7ache/
 .dmypy.json
 dmypy.json
 
@@ -115,5 +115,7 @@ dmypy.json
 .pyre/
 
 .vscode
-
+/build/*
+build/*
+build
 data/data*
