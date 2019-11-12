@@ -2,6 +2,7 @@
 This are the helperfunction for the main programme
 """
 from os import path
+from calc import get_altitude
 
 
 import json
@@ -11,7 +12,6 @@ import board
 import busio
 import serial
 
-import altitude
 import temperature_driver
 import gyro_driver
 
@@ -178,7 +178,7 @@ def get_alt(pressure_0, pressure_now, temperature_now):
     The function that calculates the altitude
     """
     try:
-        return altitude.getAltitude(temperature_now, pressure_now, pressure_0)
+        return get_altitude(temperature_now, pressure_now, pressure_0)
     except Exception:
         return 9999
 
