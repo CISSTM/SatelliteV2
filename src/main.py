@@ -8,7 +8,11 @@ from helpers import get_temp, get_press, get_alt, get_acc, get_x_angle, get_y_an
     get_z_angle, get_mag_x, get_mag_y, get_gravity, to_send
 
 SCHEDULE = sched.scheduler(time.time, time.sleep)
+
 FIRST_PRESS = get_press()
+if FIRST_PRESS in (1111, 9999):
+    FIRST_PRESS = 1013.25
+
 def get_data(schedule_call):
     """
     The function that just makes sure everything gets called

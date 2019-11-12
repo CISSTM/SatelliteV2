@@ -10,8 +10,11 @@ import datetime
 import board
 import busio
 import serial
+
+import altitude
 import temperature_driver
 import gyro_driver
+
 
 
 BASEPATH = path.dirname(__file__)
@@ -175,32 +178,7 @@ def get_alt(pressure_0, pressure_now, temperature_now):
     The function that calculates the altitude
     """
     try:
-        if pressure_0 < 500:
-            print("Pressure is to low")
-            pressure_0 = 1013.25
-
-        if pressure_0 in (1111, 9999):
-            print("Initial pressure error")
-            pressure_0 = 1013.25
-
-        if pressure_now < 500:
-            print("Pressure is to low")
-            pressure_now = 1013.25
-
-        if pressure_now in (1111, 9999):
-            print("Pressure error")
-            pressure_now = 1013.25
-
-        if temperature_now in (1111, 2222, 9999):
-            print("Temperature error")
-            temperature_now = 5
-
-        height = (((pressure_0/pressure_now)**(1/5.257)-1)*(temperature_now+273.15))/(0.0065)
-        if height < 0:
-            height = abs(height) + 9000
-        return height
-    except ZeroDivisionError:
-        return get_alt(pressure_0, pressure_now + 1, temperature_now)
+        return altitude.getAltitude(temperature_now, pressure_now, pressure_0)
     except Exception:
         return 9999
 
