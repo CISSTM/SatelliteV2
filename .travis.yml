@@ -9,4 +9,4 @@ install:
   - pip install pylint
 
 script:
-  - cd src && pylint main.py helpers.py -d global-statement,broad-except
+  - cd src && pylint main.py helpers.py -d global-statement,broad-except --unsafe-load-any-extension=y

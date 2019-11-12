@@ -2,11 +2,11 @@
 This are the helperfunction for the main programme
 """
 from os import path
-from calc import get_altitude
-
 
 import json
 import datetime
+
+from calc import get_altitude
 
 import board
 import busio
