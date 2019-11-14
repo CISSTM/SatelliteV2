@@ -1,37 +1,60 @@
 """
-This are the helperfunction for the main programme
+These are the helper functions for the main program
 """
 from os import path
 
 import json
 import datetime
+import logging
 
-from calc import get_altitude
+from calc import get_altitude, get_distance_rssi
 
 import board
 import busio
 import serial
 
+import adafruit_rfm69
 import temperature_driver
 import gyro_driver
 
+FILE_LOGGER = logging.FileHandler('log.txt')
+FILE_LOGGER.setLevel(logging.WARNING)
+FILE_LOGGER.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
+CONSOLE_LOGGER = logging.StreamHandler()
+CONSOLE_LOGGER.setLevel(logging.info)
+CONSOLE_LOGGER.setFormatter(logging.Formatter("%(message)s (%(levelname)s)"))
 
 BASEPATH = path.dirname(__file__)
 I2C = busio.I2C(board.SCL, board.SDA)
+FREQ = 868.0
+
 try:
     BME280 = temperature_driver.Adafruit_BME280_I2C(I2C)
+    logging.debug("Connected to BME280")
 except RuntimeError:
-    print("BMP280 not connected")
-except Exception:
-    print("Unknown error")
+    logging.error("BMP280 not connected")
+except Exception as error:
+    logging.error(error)
 
 try:
     BNO055 = gyro_driver.BNO055(I2C)
+    logging.debug("Connected to BNO055")
 except RuntimeError:
-    print("BNO055 not connected")
-except Exception:
-    print("Unkown error")
+    logging.error("BNO055 not connected")
+except Exception as error:
+    logging.error(error)
+
+try:
+    SPI = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+    CS = board.CE0
+    RESET = board.D5
+    RFM69 = adafruit_rfm69.RFM69(SPI, CS, RESET, FREQ)
+    logging.debug("Connected to RFM69")
+except RuntimeError:
+    logging.error("Cannot connect to RFM69")
+except Exception as error:
+    logging.error(error)
 
 TIMES_SEND = 0
 TIMES_SAVED = 0
@@ -39,21 +62,24 @@ CURRENT_FILE_OUTPUT = []
 
 try:
     SER = serial.Serial('/dev/ttyS0', 9600, timeout=1)
+    logging.debug("Connected to 433MHz transmitter")
 except Exception:
     print("Cannot make serial connection")
+
 def get_temp():
     """
     The function that gets the temperature
     """
     try:
         temp = BME280.temperature
+        logging.debug("Got temperature")
         return temp
     except RuntimeError:
-        print("BMP280 not connected")
+        logging.error("BMP280 not connected")
         temp = get_backup_temp()
         return temp
     except Exception as error:
-        print(error)
+        logging.error(error)
         return 9999
 
 def get_backup_temp():
@@ -62,11 +88,28 @@ def get_backup_temp():
     """
     try:
         temp = BNO055.temperature
+        logging.warning("Got backup temperature")
         return temp
     except RuntimeError:
-        print("BNO055 not connected")
+        logging.error("BNO055 not connected")
+        return get_backup_temp_2()
+    except Exception as error:
+        logging.error(error)
+        return 9999
+
+def get_backup_temp_2():
+    """
+    This is the third way to get the temperature
+    """
+    try:
+        temp = RFM69.temperature
+        logging.warning("Got second backup temperature")
+        return temp
+    except RuntimeError:
+        logging.error("RFM69 not connected")
         return 2222
-    except Exception:
+    except Exception as error:
+        logging.error(error)
         return 9999
 
 def get_press():
@@ -75,11 +118,13 @@ def get_press():
     """
     try:
         press = BME280.pressure
+        logging.debug("Got pressure")
         return press
     except RuntimeError:
-        print("BMP280 not connected")
+        logging.error("BMP280 not connected")
         return 1111
-    except Exception:
+    except Exception as error:
+        logging.error(error)
         return 9999
 
 def get_acc():
@@ -88,77 +133,46 @@ def get_acc():
     """
     try:
         acc = BNO055.linear_acceleration[2]
+        logging.debug("Got acceleration")
         return acc
     except RuntimeError:
-        print("BNO055 not connected")
+        logging.error("BNO055 not connected")
         return 2222
-    except Exception:
+    except Exception as error:
+        logging.error(error)
         return 9999
 
-def get_x_angle():
+def get_angles():
     """
-    The function that gets the x angle
+    The function that gets angles
     """
     try:
-        angle = BNO055.euler[0]
+        data = BNO055.euler
+        angle = (data[0], data[1], data[2])
+        logging.debug("Got angles")
         return angle
     except RuntimeError:
-        print("BNO055 not connected")
-        return 2222
-    except Exception:
+        logging.error("BNO055 not connected")
+        return (2222, 2222, 2222)
+    except Exception as error:
+        logging.error(error)
         return 9999
 
-def get_y_angle():
+def get_magnets():
     """
-    The function that gets the y angle
-    """
-    try:
-        angle = BNO055.euler[1]
-        return angle
-    except RuntimeError:
-        print("BNO055 not connected")
-        return 2222
-    except Exception:
-        return 9999
-
-def get_z_angle():
-    """
-    The function that gets the z angle
+    The function that gets the magnets
     """
     try:
-        angle = BNO055.euler[2]
-        return angle
-    except RuntimeError:
-        print("BNO055 not connected")
-        return 2222
-    except Exception:
-        return 9999
-
-def get_mag_x():
-    """
-    The function that gets the x mag
-    """
-    try:
-        mag = BNO055.magnetometer[0]
+        data = BNO055.magnetometer
+        mag = (data[0], data[1])
+        logging.debug("Got magnet data")
         return mag
     except RuntimeError:
-        print("BNO055 not connected")
-        return 2222
-    except Exception:
-        return 9999
-
-def get_mag_y():
-    """
-    The function that gets the y mag
-    """
-    try:
-        mag = BNO055.magnetometer[1]
-        return mag
-    except RuntimeError:
-        print("BNO055 not connected")
-        return 2222
-    except Exception:
-        return 9999
+        logging.error("BNO055 not connected")
+        return (2222, 2222)
+    except Exception as error:
+        logging.error(error)
+        return (9999, 9999)
 
 def get_gravity():
     """
@@ -166,11 +180,13 @@ def get_gravity():
     """
     try:
         gravity = BNO055.gravity[2]
+        logging.debug("Got gravity")
         return gravity
     except RuntimeError:
-        print("BNO055 not connected")
+        logging.error("BNO055 not connected")
         return 2222
-    except Exception:
+    except Exception as error:
+        logging.error(error)
         return 9999
 
 def get_alt(pressure_0, pressure_now, temperature_now):
@@ -178,9 +194,28 @@ def get_alt(pressure_0, pressure_now, temperature_now):
     The function that calculates the altitude
     """
     try:
-        return get_altitude(temperature_now, pressure_now, pressure_0)
-    except Exception:
+        altitude = get_altitude(temperature_now, pressure_now, pressure_0)
+        logging.debug("Calculated altitude")
+        return altitude
+    except Exception as error:
+        logging.warning(error)
         return 9999
+
+def get_distance():
+    """
+    Calculate the distance to object
+    """
+    try:
+        rssi = RFM69.rssi
+        logging.debug("Got RSSI data")
+        distance = get_distance_rssi(rssi, FREQ, 2.2, 1)
+        logging.debug("Calculated distance")
+        return distance
+    except RuntimeError:
+        logging.error("RFM69 not connected")
+    except Exception as error:
+        logging.error(error)
+
 
 def to_send(topic, value):
     """
@@ -194,6 +229,7 @@ def to_send(topic, value):
     # Round numbers for when to send
     if isinstance(value, float):
         value = int(value)
+        logging.debug("Converted float to int")
     total = {
         topic: value,
         "s": TIMES_SEND
@@ -207,19 +243,22 @@ def to_send(topic, value):
         if value < 0:
             value = abs(value) + 9000
             value = int(value)
+            logging.debug("Negative value converted to positive int")
         while value > 9999:
             value = value/10
             value = int(value)
+            logging.debug("Value to big, dividing by 10")
         ## Add the value
         str_to_send += str(format(value, '04d'))
         ## Add closing message
         str_to_send += "22"
     except Exception:
-        print("Error converting to short string")
+        logging.error("Error converting to short string")
         str_to_send = "1111111122"
 
     ## Add to current save
     CURRENT_FILE_OUTPUT.append(total)
+    logging.debug("Added data to data array")
 
     if TIMES_SEND % 100 == 0:
         try:
@@ -229,16 +268,22 @@ def to_send(topic, value):
                 '-' + str(datetime.datetime.now().hour) + \
                 ',' + str(datetime.datetime.now().minute) + \
                 ',' + str(datetime.datetime.now().second) + '.json', 'w+') as file_backup:
+                logging.debug("Created file to save data")
                 json.dump(CURRENT_FILE_OUTPUT, file_backup)
+                logging.debug("Saved data to file")
                 CURRENT_FILE_OUTPUT = []
+                logging.debug("Cleared data array")
             TIMES_SAVED += 1
         except Exception:
-            print("Cannot save, so just sending for now.")
+            logging.warning("Cannot save, so just sending for now.")
             CURRENT_FILE_OUTPUT = []
     try:
         sending = int(str_to_send)
+        logging.debug("Convert data to int for smaller packet size")
         byte_send = sending.to_bytes(4, byteorder='big')
+        logging.debug("Convert int to bytes, trying to send bytes")
         SER.write(byte_send)
+        logging.debug("Send data with 433MHz transmitter")
     except Exception:
-        print("Cannot send, just saving for now")
-    print(total)
+        logging.warning("Cannot send, just saving for now")
+    logging.info(total)

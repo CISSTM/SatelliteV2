@@ -1,1 +1,1 @@
-import src/main
+from src import main
