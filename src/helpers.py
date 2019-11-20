@@ -122,7 +122,7 @@ def get_press():
         return press
     except RuntimeError:
         logging.error("BMP280 not connected")
-        return 1111
+        return 2222
     except Exception as error:
         logging.error(error)
         return 9999

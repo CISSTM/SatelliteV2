@@ -71,7 +71,7 @@ static PyObject* get_altitude(PyObject* self, PyObject* args){
         }
     }
 
-    alt = ((powf(pressure_0/pressure_now, 0.19) - 1) * (temp_now + 273.15)) / 0.0065;
+    alt = ((powf(pressure_now/pressure_0, 0.19) - 1) * (temp_now + 273.15)) / -0.0065;
 
     if (alt < 0) {
         alt = -alt + 9000;
