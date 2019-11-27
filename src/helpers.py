@@ -47,12 +47,14 @@ except Exception as error:
     logging.error(error)
 
 try:
-    SPI = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-    CS = digitalio.DigitalInOut(board.CE0)
-    RESET = digitalio.DigitalInOut(board.D5)
-    RFM69 = adafruit_rfm69.RFM69(SPI, CS, RESET, FREQ)
+    SPI = busio.SPI(board.SCK_1, MOSI=board.MOSI_1, MISO=board.MISO_1)
+    CS = digitalio.DigitalInOut(board.D6)
+    RESET = digitalio.DigitalInOut(board.D16)
+    RFM69 = adafruit_rfm69.RFM69(SPI, CS, RESET, FREQ, baudrate=1000000)
     logging.debug("Connected to RFM69")
+    print("Connected")
 except RuntimeError as error:
+    raise error
     logging.error("Cannot connect to RFM69")
 except Exception as error:
     logging.error(error)
@@ -157,7 +159,7 @@ def get_angles():
         return (2222, 2222, 2222)
     except Exception as error:
         logging.error(error)
-        return 9999
+        return (9999, 9999, 9999)
 
 def get_magnets():
     """
