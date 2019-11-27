@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
+User=pi
 WorkingDirectory=/home/pi/SatelliteV2
 ExecStart=/usr/bin/python3 /home/pi/SatelliteV2/src/main.py
 Restart=always

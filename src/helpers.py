@@ -22,7 +22,7 @@ FILE_LOGGER.setLevel(logging.WARNING)
 FILE_LOGGER.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
 CONSOLE_LOGGER = logging.StreamHandler()
-CONSOLE_LOGGER.setLevel(logging.info)
+CONSOLE_LOGGER.setLevel(logging.DEBUG)
 CONSOLE_LOGGER.setFormatter(logging.Formatter("%(message)s (%(levelname)s)"))
 
 BASEPATH = path.dirname(__file__)
@@ -240,7 +240,10 @@ def to_send(topic, value):
         str_to_send = "11"
         ## Topic number
         str_to_send += str(ord(topic[0])-31)
-        if value < 0:
+        if value is None:
+            value = 0
+
+        if int(value) < 0:
             value = abs(value) + 9000
             value = int(value)
             logging.debug("Negative value converted to positive int")

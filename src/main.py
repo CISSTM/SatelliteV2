@@ -5,7 +5,7 @@ This is the main part, it makes the calls from the helpers file
 import sched
 import time
 
-from .helpers import get_temp, get_press, get_alt, get_acc, get_angles, \
+from helpers import get_temp, get_press, get_alt, get_acc, get_angles, \
      get_magnets, get_gravity, get_distance, to_send
 
 SCHEDULE = sched.scheduler(time.time, time.sleep)
