@@ -52,9 +52,7 @@ try:
     RESET = digitalio.DigitalInOut(board.D16)
     RFM69 = adafruit_rfm69.RFM69(SPI, CS, RESET, FREQ, baudrate=1000000)
     logging.debug("Connected to RFM69")
-    print("Connected")
 except RuntimeError as error:
-    raise error
     logging.error("Cannot connect to RFM69")
 except Exception as error:
     logging.error(error)
