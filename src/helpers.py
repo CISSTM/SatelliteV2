@@ -11,6 +11,7 @@ from calc import get_altitude, get_distance_rssi
 
 import board
 import busio
+import digitalio
 import serial
 
 import adafruit_rfm69
@@ -47,11 +48,11 @@ except Exception as error:
 
 try:
     SPI = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-    CS = board.CE0
-    RESET = board.D5
+    CS = digitalio.DigitalInOut(board.CE0)
+    RESET = digitalio.DigitalInOut(board.D5)
     RFM69 = adafruit_rfm69.RFM69(SPI, CS, RESET, FREQ)
     logging.debug("Connected to RFM69")
-except RuntimeError:
+except RuntimeError as error:
     logging.error("Cannot connect to RFM69")
 except Exception as error:
     logging.error(error)
@@ -213,8 +214,10 @@ def get_distance():
         return distance
     except RuntimeError:
         logging.error("RFM69 not connected")
+        return 2222
     except Exception as error:
         logging.error(error)
+        return 9999
 
 
 def to_send(topic, value):
