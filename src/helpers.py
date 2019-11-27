@@ -81,7 +81,8 @@ def get_temp():
         return temp
     except Exception as error:
         logging.error(error)
-        return 9999
+        temp = get_backup_temp()
+        return temp
 
 def get_backup_temp():
     """
@@ -96,7 +97,8 @@ def get_backup_temp():
         return get_backup_temp_2()
     except Exception as error:
         logging.error(error)
-        return 9999
+        temp = get_backup_temp_2()
+        return temp
 
 def get_backup_temp_2():
     """
