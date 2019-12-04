@@ -33,7 +33,9 @@ def get_data(schedule_call):
     to_send("ux_mag", magnets[0])
     to_send("vy_mag", magnets[1])
     to_send("gravity", get_gravity())
-    to_send("distance", get_distance())
+    distance, rssi = get_distance()
+    to_send("distance", distance)
+    to_send("rssi", rssi)
     SCHEDULE.enter(0.2, 1, get_data, (schedule_call,))
 
 SCHEDULE.enter(0.2, 1, get_data, (SCHEDULE,))

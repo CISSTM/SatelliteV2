@@ -26,6 +26,8 @@ CONSOLE_LOGGER = logging.StreamHandler()
 CONSOLE_LOGGER.setLevel(logging.DEBUG)
 CONSOLE_LOGGER.setFormatter(logging.Formatter("%(message)s (%(levelname)s)"))
 
+logging.getLogger().setLevel(logging.INFO)
+
 BASEPATH = path.dirname(__file__)
 I2C = busio.I2C(board.SCL, board.SDA)
 FREQ = 868.0
@@ -209,17 +211,18 @@ def get_distance():
     Calculate the distance to object
     """
     try:
-        rssi = RFM69.rssi
+        RFM69.receive(timeout=0.05)
+        rssi = -RFM69.rssi
         logging.debug("Got RSSI data")
-        distance = get_distance_rssi(rssi, FREQ, 2.2, 1)
+        distance = get_distance_rssi(rssi, FREQ * 10**6, 2.2, 1)
         logging.debug("Calculated distance")
-        return distance
+        return distance, rssi
     except RuntimeError:
         logging.error("RFM69 not connected")
-        return 2222
+        return 2222, 2222
     except Exception as error:
         logging.error(error)
-        return 9999
+        return 9999, 9999
 
 
 def to_send(topic, value):
