@@ -1,5 +1,5 @@
 # CissTM Satellite V2 (Python)
-[![Build Status](https://travis-ci.com/CISSTM/SatelliteV2.svg?branch=master)](https://travis-ci.com/CISSTM/SatelliteV2)
+[![Build Status](https://travis-ci.com/CISSTM/SatelliteV2.svg?branch=main)](https://travis-ci.com/CISSTM/SatelliteV2)
 
 
 The CISSTM Satellite (Version 2), this is our satellite created using Python (and possibly a bit of C).
